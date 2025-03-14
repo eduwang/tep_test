@@ -8,7 +8,10 @@ client = OpenAI(api_key=api_key)  # OpenAI API 키를 여기에 입력하세요!
 
 
 # 페이지 설정 - wide 레이아웃 적용
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_title="교사교육용 챗봇 프로토타입",  # 🔹 웹페이지 브라우저 탭에 표시되는 제목
+    )
 
 # 기존 데이터 저장 공간 설정
 if "chat_history" not in st.session_state:
@@ -22,14 +25,23 @@ if "character_input" not in st.session_state:
 if "dialogue_input" not in st.session_state:
     st.session_state.dialogue_input = ""  # 대화 입력 저장 공간
 
+
+
+# 이미지 목록 준비
+image_files = ["Imgs/test_1.png", "Imgs/test_2.png", "Imgs/test_3.png"]
+images = [Image.open(img) for img in image_files] 
+
 # 화면을 좌우로 분할
 left_col, right_col = st.columns([10, 10])
 
 # 좌측에 이미지 표시
 with left_col:
-    st.header("이미지 섹션")
-    image = Image.open("Imgs/test_1.png")  # 이미지 파일 이름을 여기에 적어주세요.
-    st.image(image, use_container_width=True)
+    st.header("문제 상황")
+    # 숫자 버튼 (1, 2, 3) 만들기
+    image_index = st.radio(f"총 {len(images)}장의 그림이 있습니다.", range(1, len(images) + 1), horizontal=True) - 1
+
+    # 선택된 이미지 표시
+    st.image(images[image_index], use_container_width=True)
 
     # 이미지 설명 입력 (보이지 않지만, 데이터로 저장됨)
     image_description = "이 이미지는 수학에 어려움을 겪는 학생A의 상황입니다."  # 예제 설명 (실제 설명을 적어주세요)
@@ -62,7 +74,7 @@ with right_col:
             st.warning("등장인물과 대화를 모두 입력해주세요!")
 
     # 대화 내용 출력 (등장인물과 대화를 가로로 나란히)
-    st.subheader("대화 내용")
+    st.subheader("작성한 대화 내용")
     if st.session_state.chat_history:
         for character, dialogue in st.session_state.chat_history:
             col1, col2 = st.columns([1, 3])
