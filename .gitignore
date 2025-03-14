@@ -1,0 +1,2 @@
+# 특정 파일만 무시
+.streamlit/secrets.toml
