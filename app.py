@@ -2,6 +2,10 @@ import streamlit as st
 from PIL import Image
 from openai import OpenAI
 
+#ChatGPT 세팅
+api_key = st.secrets["openai"]["api_key"]
+client = OpenAI(api_key=api_key)  # OpenAI API 키를 여기에 입력하세요!
+
 
 # 페이지 설정 - wide 레이아웃 적용
 st.set_page_config(layout="wide")
@@ -11,6 +15,12 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "image_description" not in st.session_state:
     st.session_state.image_description = ""  # 이미지 설명 저장 공간
+if "feedback" not in st.session_state:
+    st.session_state.feedback = ""  # ChatGPT의 피드백 저장 공간
+if "character_input" not in st.session_state:
+    st.session_state.character_input = ""  # 등장인물 입력 저장 공간
+if "dialogue_input" not in st.session_state:
+    st.session_state.dialogue_input = ""  # 대화 입력 저장 공간
 
 # 화면을 좌우로 분할
 left_col, right_col = st.columns([10, 10])
@@ -22,7 +32,7 @@ with left_col:
     st.image(image, use_container_width=True)
 
     # 이미지 설명 입력 (보이지 않지만, 데이터로 저장됨)
-    image_description = "이 이미지는 한 남성이 공원에서 산책하는 모습을 담고 있습니다."  # 예제 설명 (실제 설명을 적어주세요)
+    image_description = "이 이미지는 수학에 어려움을 겪는 학생A의 상황입니다."  # 예제 설명 (실제 설명을 적어주세요)
     st.session_state.image_description = image_description
 
 # 우측: 대화 입력 섹션
@@ -37,7 +47,7 @@ with right_col:
     col1, col2 = st.columns([1, 3])
     
     with col1:
-        character = st.text_input("등장인물", placeholder="예: 주인공, 친구, 선생님")
+        character = st.text_input("등장인물", placeholder="예: 학생A, 교사, 학생B")
         
     with col2:
         user_input = st.text_input("대화", placeholder="대화를 입력하세요")
@@ -62,3 +72,39 @@ with right_col:
                 st.markdown(dialogue)
     else:
         st.info("아직 대화가 없습니다. 대화를 입력해보세요!")
+
+    # 🔹 제출 버튼 추가 (ChatGPT API 요청)
+    if st.button("제출하고 피드백 받기"):
+        with st.spinner("분석 중..."):
+            # ChatGPT에 보낼 메시지 구성
+            prompt = """
+            당신은 교사교육 전문가 입니다. 주어진 이미지 설명과 대화 내용을 분석하고, 교사교육 전문가의 관점에서 피드백을 해줘
+            피드백은 다음 기준을 따라야 합니다:
+            1. 학생이 어려워하는 개념을 구체적으로 지적하기
+            2. 개선 방법을 단계별로 제공하기
+            3. 교사가 어떤 방식으로 지도하면 좋을지 조언하기
+            """
+            messages = [
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": f"이미지 설명: {st.session_state.image_description}"},
+            ]
+            for char, text in st.session_state.chat_history:
+                messages.append({"role": "user", "content": f"{char}: {text}"})
+
+            # OpenAI API 호출
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=messages
+            )
+
+            # 결과 저장 및 표시
+            st.session_state.feedback = response.choices[0].message.content
+            st.success("피드백을 받았습니다!")
+
+# 전체 너비를 차지하는 피드백 영역 (새로운 row 추가)
+st.markdown("---")  # 가독성을 위한 구분선 추가
+st.header("피드백")
+if st.session_state.feedback:
+    st.markdown(st.session_state.feedback)
+else:
+    st.info("아직 피드백이 없습니다. '제출하고 피드백 받기' 버튼을 눌러주세요!")
