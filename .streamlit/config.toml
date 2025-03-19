@@ -1,0 +1,6 @@
+[server]
+headless = true
+runOnSave = true
+fileWatcherType = "poll"
+[global]
+defaultFile = "main.py"  # ⭐ `main.py`를 기본 실행 파일로 설정

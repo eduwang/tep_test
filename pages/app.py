@@ -7,11 +7,21 @@ api_key = st.secrets["openai"]["api_key"]
 client = OpenAI(api_key=api_key)  # OpenAI API 키를 여기에 입력하세요!
 
 
-# 페이지 설정 - wide 레이아웃 적용
+# 페이지 전체 너비로 설정
 st.set_page_config(
     layout="wide",
     page_title="교사교육용 챗봇 프로토타입",  # 🔹 웹페이지 브라우저 탭에 표시되는 제목
-    )
+)
+
+# 🔥 CSS를 사용하여 사이드바 및 네비게이션 완전 제거
+hide_sidebar = """
+    <style>
+        [data-testid="stSidebar"] {display: none !important;}
+        [data-testid="stSidebarNav"] {display: none !important;}
+    </style>
+"""
+st.markdown(hide_sidebar, unsafe_allow_html=True)
+
 
 # 기존 데이터 저장 공간 설정
 if "chat_history" not in st.session_state:
@@ -120,3 +130,8 @@ if st.session_state.feedback:
     st.markdown(st.session_state.feedback)
 else:
     st.info("아직 피드백이 없습니다. '제출하고 피드백 받기' 버튼을 눌러주세요!")
+
+
+# 푸터 추가
+st.markdown("---")  # 가독성을 위한 구분선
+st.markdown("© 2024 MyApp | Developed by [Your Name](https://yourwebsite.com)")
