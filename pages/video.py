@@ -38,7 +38,7 @@ if embed_url:
 else:
     st.error("유효한 유튜브 링크를 확인하세요!")
 
-if st.button("가상 대화 입력 페이지로 이동", use_container_width=True):
+if st.button("Lesson Play 페이지로 이동", use_container_width=True):
     st.switch_page("pages/app.py")  # 사이드바 없이 페이지 전환 가능!
 
 # 푸터 추가
